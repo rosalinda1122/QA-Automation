@@ -1,0 +1,34 @@
+///json
+[
+  { "type": "espresso" },
+  { "type": "latte" },
+  { "type": "cappuccino" }
+]
+///yaml
+config:
+  target: 'https://coffee.alexflipnote.dev'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+  payload:
+    path: './payload.json'
+    fields:
+      - "type"
+  ensure:
+    maxErrors: 1%
+  plugins:
+    metrics-by-endpoint: {}
+scenarios:
+  - flow:
+    - get:
+        url: "/random"
+    - post:
+        url: "/type"
+        json:
+          type: "{{ type }}"
+
+///Metryki końcowe
+expect:
+  - "response_time.p95 < 2000"
+  - "http_errors < 1"
+  - "response_time.mean < 1000"
